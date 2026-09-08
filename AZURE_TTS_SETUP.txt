@@ -1,0 +1,19 @@
+Verva — Azure Neural TTS setup
+
+1. Create an Azure Speech resource and copy its Key and Region.
+2. Put these ONLY in backend/.env:
+   AZURE_SPEECH_KEY=your_azure_speech_key
+   AZURE_SPEECH_REGION=your_azure_region
+3. Keep Azure credentials out of frontend/.env and GitHub.
+4. backend/.env.example intentionally leaves the secret blank.
+5. Frontend calls POST /api/tts; backend calls Azure Speech and returns MP3 audio.
+6. Female voice: en-US-JennyNeural
+   Male voice:   en-US-GuyNeural
+
+The existing login, recording, topics, timer and practice flow are unchanged.
+
+For LAN testing, set the frontend's actual .env to your laptop's LAN API address,
+for example:
+VITE_API_URL=http://YOUR-LAPTOP-IP:5000
+
+Do not commit backend/.env.

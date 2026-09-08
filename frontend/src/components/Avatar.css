@@ -1,0 +1,88 @@
+.avatar-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-ring {
+  position: absolute;
+  top: -10px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 3px solid var(--color-primary-light);
+  opacity: 0.5;
+}
+
+.avatar-idle .avatar-svg {
+  animation: avatar-bob 3.5s ease-in-out infinite;
+}
+
+.avatar-speaking .avatar-svg {
+  animation: avatar-talk-bob 0.6s ease-in-out infinite;
+}
+
+.avatar-speaking .avatar-ring {
+  animation: avatar-pulse 0.9s ease-in-out infinite;
+  border-color: var(--color-primary);
+}
+
+@keyframes avatar-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes avatar-talk-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.02); }
+}
+
+@keyframes avatar-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.06); opacity: 0.9; }
+}
+
+.avatar-mouth {
+  transform-origin: 100px 130px;
+}
+
+.avatar-speaking .avatar-mouth {
+  animation: avatar-talk-mouth 0.45s ease-in-out infinite;
+}
+
+@keyframes avatar-talk-mouth {
+  0%, 100% { d: path("M75 130 Q100 130 125 130"); transform: scaleY(1); }
+  50% { transform: scaleY(2.4); }
+}
+
+.avatar-idle .avatar-eye {
+  animation: avatar-blink 4.5s ease-in-out infinite;
+}
+
+@keyframes avatar-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+.avatar-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.avatar-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-border);
+}
+
+.avatar-indicator-speaking {
+  background: var(--color-primary);
+  animation: avatar-pulse 0.9s ease-in-out infinite;
+}
