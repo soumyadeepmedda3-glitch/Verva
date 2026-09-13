@@ -11,7 +11,11 @@ import ResetPassword from "./pages/ResetPassword";
 import { AuthProvider } from "./context/AuthContext";
 
 export default function App() {
+  // Practice configuration chosen on the Setup page (topic, level, duration).
   const [practiceConfig, setPracticeConfig] = useState(null);
+
+  // Result of the last finished practice session (recording blob/url etc.)
+  // Kept only in memory — refreshing the page clears it, which is fine per spec.
   const [practiceResult, setPracticeResult] = useState(null);
 
   function handleStartPractice(config) {
@@ -24,6 +28,13 @@ export default function App() {
   }
 
   function handlePracticeAgain() {
+    // Release the previous session's recording from memory now that
+    // we're done with it — this is a deliberate lifecycle point (not a
+    // component mount/unmount), so it isn't affected by React
+    // StrictMode's development-only double-invoking of effects.
+    if (practiceResult?.url) {
+      URL.revokeObjectURL(practiceResult.url);
+    }
     setPracticeResult(null);
     setPracticeConfig(null);
   }

@@ -32,14 +32,13 @@ export default function Complete({ result, onPracticeAgain }) {
     }
   }, [result, navigate]);
 
-  // Release the object URL when this screen is left, to avoid memory leaks.
-  useEffect(() => {
-    return () => {
-      if (result?.url) {
-        URL.revokeObjectURL(result.url);
-      }
-    };
-  }, [result]);
+  // Note: the recording's object URL is intentionally NOT revoked here.
+  // Revoking it on this component's unmount is unsafe under React
+  // StrictMode (which mounts, tears down, and remounts every component
+  // once in development) — it would destroy the blob right after
+  // creating it, causing "Download failed" and silent playback failures.
+  // The URL is released instead in App.jsx's handlePracticeAgain(),
+  // which is a real, deliberate end-of-session point.
 
   // Stop any in-progress reconstructed playback if the user navigates away.
   useEffect(() => {
