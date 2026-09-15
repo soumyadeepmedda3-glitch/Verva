@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import HowToUse from "./pages/HowToUse";
+import About from "./pages/About";
 import { AuthProvider } from "./context/AuthContext";
 
 export default function App() {
@@ -47,6 +49,8 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/how-to-use" element={<HowToUse />} />
+        <Route path="/about" element={<About />} />
         <Route path="/setup" element={<Setup onStartPractice={handleStartPractice} />} />
         <Route
           path="/practice"

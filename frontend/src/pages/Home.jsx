@@ -1,5 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import Header from "../components/Header";
+import CurtainTransition from "../components/CurtainTransition";
 
 const FEATURES = [
   {
@@ -26,10 +28,17 @@ const FEATURES = [
 
 export default function Home() {
   const navigate = useNavigate();
+  const [isEntering, setIsEntering] = useState(false);
+
+  function handleGetStarted() {
+    setIsEntering(true);
+  }
 
   return (
     <div className="page">
       <Header />
+
+      {isEntering && <CurtainTransition onFinish={() => navigate("/setup")} />}
 
       <section className="hero">
         <div className="hero-content">
@@ -43,9 +52,14 @@ export default function Home() {
             line, say the suggested response out loud, and record your entire practice session
             to hear your own progress.
           </p>
-          <button className="btn btn-primary btn-lg" onClick={() => navigate("/setup")}>
-            Start Practice
-          </button>
+          <div className="hero-actions">
+            <button className="btn btn-primary btn-lg" onClick={handleGetStarted}>
+              Get Started
+            </button>
+            <Link className="btn btn-secondary btn-lg" to="/how-to-use">
+              How It Works
+            </Link>
+          </div>
         </div>
         <div className="hero-visual" aria-hidden="true">
           <div className="hero-bubble hero-bubble-1">Hello! How are you today?</div>
@@ -70,13 +84,18 @@ export default function Home() {
         <div className="cta-card card">
           <h2>Ready to practice?</h2>
           <p>Pick a topic, choose your level, and start speaking in less than a minute.</p>
-          <button className="btn btn-primary btn-lg" onClick={() => navigate("/setup")}>
-            Start Practice
+          <button className="btn btn-primary btn-lg" onClick={handleGetStarted}>
+            Get Started
           </button>
         </div>
       </section>
 
       <footer className="app-footer">
+        <div className="app-footer-links">
+          <Link to="/how-to-use">How to Use</Link>
+          <span className="app-footer-dot">•</span>
+          <Link to="/about">About</Link>
+        </div>
         <p>Verva — a simple way to practice spoken English.</p>
       </footer>
     </div>

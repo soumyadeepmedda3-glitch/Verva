@@ -1,0 +1,69 @@
+.curtain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.curtain-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background:
+    repeating-linear-gradient(
+      100deg,
+      rgba(0, 0, 0, 0.22) 0px,
+      rgba(0, 0, 0, 0.22) 16px,
+      rgba(255, 255, 255, 0.05) 16px,
+      rgba(255, 255, 255, 0.05) 32px
+    ),
+    linear-gradient(160deg, #6b46c9 0%, #4a2a99 45%, #241454 100%);
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55);
+  transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.curtain-left {
+  left: 0;
+  transform: translateX(0%);
+  border-right: 2px solid rgba(255, 208, 116, 0.55);
+}
+
+.curtain-right {
+  right: 0;
+  transform: translateX(0%);
+  border-left: 2px solid rgba(255, 208, 116, 0.55);
+}
+
+.curtain-open.curtain-left {
+  transform: translateX(-100%);
+}
+
+.curtain-open.curtain-right {
+  transform: translateX(100%);
+}
+
+.curtain-fold {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.12), transparent 60%);
+}
+
+.curtain-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 208, 116, 0.95), transparent 70%);
+  box-shadow: 0 0 40px 12px rgba(255, 208, 116, 0.5);
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  transition: opacity 0.5s ease 0.15s;
+}
+
+.curtain-spark-fade {
+  opacity: 0;
+}
