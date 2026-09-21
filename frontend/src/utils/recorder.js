@@ -1,11 +1,12 @@
-// Thin wrapper around navigator.mediaDevices.getUserMedia + MediaRecorder.
-// Keeps ONE continuous recording for the whole practice session.
+// Handles microphone access and one continuous recording
+// for the whole Verva practice session.
 
 export function isRecordingSupported() {
   return (
     typeof navigator !== "undefined" &&
     !!navigator.mediaDevices &&
     typeof navigator.mediaDevices.getUserMedia === "function" &&
+    typeof window !== "undefined" &&
     typeof window.MediaRecorder !== "undefined"
   );
 }
@@ -14,15 +15,26 @@ function pickMimeType() {
   const candidates = [
     "audio/webm;codecs=opus",
     "audio/webm",
-    "audio/ogg;codecs=opus",
     "audio/mp4",
+    "audio/ogg;codecs=opus",
+    "audio/ogg",
   ];
+
+  if (typeof MediaRecorder === "undefined") {
+    return "";
+  }
+
   for (const type of candidates) {
-    if (window.MediaRecorder && MediaRecorder.isTypeSupported(type)) {
-      return type;
+    try {
+      if (MediaRecorder.isTypeSupported(type)) {
+        return type;
+      }
+    } catch {
+      // Ignore unsupported MIME types
     }
   }
-  return ""; // let the browser pick a default
+
+  return "";
 }
 
 export class SessionRecorder {
@@ -33,77 +45,153 @@ export class SessionRecorder {
     this.mimeType = "";
   }
 
-  /**
-   * Ask for microphone permission and start recording immediately.
-   * Throws an error with a descriptive message on failure (permission
-   * denied, no microphone, unsupported browser, etc.)
-   */
   async start() {
     if (!isRecordingSupported()) {
       throw new Error("UNSUPPORTED_BROWSER");
     }
 
+    // Microphone access must be requested from the browser.
     try {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
     } catch (err) {
-      if (err && (err.name === "NotAllowedError" || err.name === "PermissionDeniedError")) {
+      console.error("Microphone error:", err);
+
+      if (
+        err?.name === "NotAllowedError" ||
+        err?.name === "PermissionDeniedError"
+      ) {
         throw new Error("PERMISSION_DENIED");
       }
-      if (err && err.name === "NotFoundError") {
+
+      if (
+        err?.name === "NotFoundError" ||
+        err?.name === "DevicesNotFoundError"
+      ) {
         throw new Error("NO_MICROPHONE");
       }
+
+      if (err?.name === "NotReadableError") {
+        throw new Error("MICROPHONE_BUSY");
+      }
+
       throw new Error("MICROPHONE_ERROR");
     }
 
     this.mimeType = pickMimeType();
     this.chunks = [];
-    this.mediaRecorder = this.mimeType
-      ? new MediaRecorder(this.stream, { mimeType: this.mimeType })
-      : new MediaRecorder(this.stream);
 
-    this.mediaRecorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) {
-        this.chunks.push(e.data);
+    try {
+      this.mediaRecorder = this.mimeType
+        ? new MediaRecorder(this.stream, {
+            mimeType: this.mimeType,
+          })
+        : new MediaRecorder(this.stream);
+    } catch (err) {
+      console.error("MediaRecorder creation failed:", err);
+      this._releaseStream();
+      throw new Error("UNSUPPORTED_RECORDING_FORMAT");
+    }
+
+    this.mediaRecorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        this.chunks.push(event.data);
       }
     };
 
-    // Collect data in small time slices so we always have something
-    // even if the session ends abruptly.
+    this.mediaRecorder.onerror = (event) => {
+      console.error("MediaRecorder error:", event.error);
+    };
+
+    // Collect audio every second.
     this.mediaRecorder.start(1000);
   }
 
   get isRecording() {
-    return !!this.mediaRecorder && this.mediaRecorder.state === "recording";
+    return (
+      !!this.mediaRecorder &&
+      this.mediaRecorder.state === "recording"
+    );
   }
 
   get state() {
-    return this.mediaRecorder ? this.mediaRecorder.state : "inactive";
+    return this.mediaRecorder
+      ? this.mediaRecorder.state
+      : "inactive";
   }
 
-  /**
-   * Stop recording and release the microphone. Resolves with the final
-   * audio Blob for the whole session.
-   */
   stop() {
     return new Promise((resolve) => {
-      if (!this.mediaRecorder || this.mediaRecorder.state === "inactive") {
-        resolve(this.chunks.length ? new Blob(this.chunks, { type: this.mimeType || "audio/webm" }) : null);
+      if (!this.mediaRecorder) {
+        resolve(null);
+        return;
+      }
+
+      if (this.mediaRecorder.state === "inactive") {
+        const blob =
+          this.chunks.length > 0
+            ? new Blob(this.chunks, {
+                type: this.mimeType || "audio/webm",
+              })
+            : null;
+
+        this._releaseStream();
+        resolve(blob);
         return;
       }
 
       this.mediaRecorder.onstop = () => {
-        const blob = new Blob(this.chunks, { type: this.mimeType || "audio/webm" });
+        const blob =
+          this.chunks.length > 0
+            ? new Blob(this.chunks, {
+                type: this.mimeType || "audio/webm",
+              })
+            : null;
+
         this._releaseStream();
         resolve(blob);
       };
 
-      this.mediaRecorder.stop();
+      try {
+        this.mediaRecorder.stop();
+      } catch (err) {
+        console.error("Stopping recorder failed:", err);
+        this._releaseStream();
+        resolve(null);
+      }
     });
+  }
+
+  cancel() {
+    if (this.mediaRecorder) {
+      try {
+        if (this.mediaRecorder.state !== "inactive") {
+          this.mediaRecorder.stop();
+        }
+      } catch {
+        // Ignore stop errors
+      }
+    }
+
+    this.chunks = [];
+    this._releaseStream();
   }
 
   _releaseStream() {
     if (this.stream) {
-      this.stream.getTracks().forEach((track) => track.stop());
+      this.stream.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch {
+          // Ignore track stop errors
+        }
+      });
+
       this.stream = null;
     }
   }

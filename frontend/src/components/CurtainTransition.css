@@ -1,3 +1,5 @@
+
+Curtaintransition · CSS
 .curtain-overlay {
   position: fixed;
   inset: 0;
@@ -5,7 +7,7 @@
   overflow: hidden;
   pointer-events: none;
 }
-
+ 
 .curtain-panel {
   position: absolute;
   top: 0;
@@ -23,33 +25,33 @@
   box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55);
   transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1);
 }
-
+ 
 .curtain-left {
   left: 0;
   transform: translateX(0%);
   border-right: 2px solid rgba(255, 208, 116, 0.55);
 }
-
+ 
 .curtain-right {
   right: 0;
   transform: translateX(0%);
   border-left: 2px solid rgba(255, 208, 116, 0.55);
 }
-
+ 
 .curtain-open.curtain-left {
   transform: translateX(-100%);
 }
-
+ 
 .curtain-open.curtain-right {
   transform: translateX(100%);
 }
-
+ 
 .curtain-fold {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.12), transparent 60%);
 }
-
+ 
 .curtain-spark {
   position: absolute;
   top: 50%;
@@ -63,7 +65,8 @@
   opacity: 1;
   transition: opacity 0.5s ease 0.15s;
 }
-
+ 
 .curtain-spark-fade {
   opacity: 0;
 }
+ 

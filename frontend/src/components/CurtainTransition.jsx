@@ -11,15 +11,22 @@ export default function CurtainTransition({ onFinish }) {
   const [opening, setOpening] = useState(false);
 
   useEffect(() => {
-    // Render closed for one frame first, then trigger the open animation
-    // so the CSS transition actually has something to animate from.
-    const raf = requestAnimationFrame(() => setOpening(true));
+    // A single requestAnimationFrame can sometimes fire before the browser
+    // has actually painted the "closed" state, which makes the CSS
+    // transition skip straight to "open" with no visible animation.
+    // Nesting two rAF calls guarantees a paint happens first.
+    let secondFrame;
+    const firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(() => setOpening(true));
+    });
+
     const timer = setTimeout(() => {
       onFinish && onFinish();
     }, 900);
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
       clearTimeout(timer);
     };
   }, [onFinish]);
