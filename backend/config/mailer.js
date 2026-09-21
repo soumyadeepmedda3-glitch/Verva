@@ -7,7 +7,7 @@ function getTransporter() {
   if (transporter) return transporter;
 
   if (!process.env.SMTP_HOST) {
-    return null; // not configured — caller falls back to console logging
+    return null;
   }
 
   transporter = nodemailer.createTransport({
@@ -15,7 +15,10 @@ function getTransporter() {
     port: Number(process.env.SMTP_PORT) || 587,
     secure: Number(process.env.SMTP_PORT) === 465,
     auth: process.env.SMTP_USER
-      ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+      ? {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        }
       : undefined,
   });
 
@@ -24,41 +27,94 @@ function getTransporter() {
 
 /**
  * Sends a password reset code to the given email address.
- * If SMTP isn't configured (no SMTP_HOST in .env), the code is logged
- * to the server console instead, so local development works without a
- * real mail server.
  */
 async function sendPasswordResetEmail(toEmail, code) {
   const appName = process.env.APP_NAME || "Verva";
+
   const subject = `${appName} password reset code`;
-  const text = `Your ${appName} password reset code is: ${code}\n\nThis code expires in 15 minutes. If you didn't request this, you can safely ignore this email.`;
+
+  const text = `Your ${appName} password reset code is: ${code}
+
+This code expires in 15 minutes.
+If you didn't request this, you can safely ignore this email.`;
+
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; color:#1f1b3a;">
+    <div style="
+      font-family: Arial, sans-serif;
+      max-width: 480px;
+      margin: 0 auto;
+      color: #1f1b3a;
+    ">
       <h2 style="margin-bottom: 4px;">${appName}</h2>
+
       <p>Your password reset code is:</p>
-      <p style="font-size: 30px; font-weight: bold; letter-spacing: 6px; margin: 12px 0;">${code}</p>
-      <p style="color:#6b6584; font-size: 14px;">This code expires in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
+
+      <p style="
+        font-size: 30px;
+        font-weight: bold;
+        letter-spacing: 6px;
+        margin: 12px 0;
+      ">
+        ${code}
+      </p>
+
+      <p style="
+        color: #6b6584;
+        font-size: 14px;
+      ">
+        This code expires in 15 minutes.
+        If you didn't request this, you can safely ignore this email.
+      </p>
     </div>
   `;
 
   const t = getTransporter();
 
+  // SMTP is not configured
   if (!t) {
     console.warn(
-      `[mailer] SMTP not configured — password reset code for ${toEmail}: ${code} (expires in 15 minutes)`
+      `[mailer] SMTP not configured — password reset code for ${toEmail}: ${code}`
     );
-    return { delivered: false };
+
+    return {
+      delivered: false,
+      message: "SMTP is not configured.",
+    };
   }
 
-  await t.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
-    to: toEmail,
-    subject,
-    text,
-    html,
-  });
+  try {
+    // Verify SMTP connection before sending
+    await t.verify();
 
-  return { delivered: true };
+    console.log("[mailer] SMTP connection verified.");
+
+    const info = await t.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: toEmail,
+      subject,
+      text,
+      html,
+    });
+
+    console.log("[mailer] Password reset email sent successfully.");
+    console.log("[mailer] Message ID:", info.messageId);
+
+    return {
+      delivered: true,
+      messageId: info.messageId,
+    };
+  } catch (error) {
+    console.error("[mailer] SMTP ERROR");
+    console.error("Code:", error.code);
+    console.error("Command:", error.command);
+    console.error("Response:", error.response);
+    console.error("Response Code:", error.responseCode);
+    console.error("Message:", error.message);
+
+    throw error;
+  }
 }
 
-module.exports = { sendPasswordResetEmail };
+module.exports = {
+  sendPasswordResetEmail,
+};

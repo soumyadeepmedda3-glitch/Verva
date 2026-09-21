@@ -20,11 +20,13 @@ app.use(
     origin: allowedOrigins,
   })
 );
+
 app.use(express.json());
 
 // ---- Routes ----
 app.get("/api/health", async (req, res) => {
   const dbOk = await testConnection();
+
   res.json({
     success: true,
     server: "ok",
@@ -36,9 +38,9 @@ app.use("/api/topics", topicsRouter);
 app.use("/api/conversations", conversationsRouter);
 app.use("/api/auth", authRouter);
 
-
 // ---- Azure Neural TTS ----
-// The Azure key/region are kept on the server. The frontend never receives them.
+// The Azure key/region are kept on the server.
+// The frontend never receives them.
 const AZURE_TTS_VOICES = {
   female: "en-US-JennyNeural",
   male: "en-US-GuyNeural",
@@ -61,7 +63,10 @@ app.post("/api/tts", async (req, res) => {
     });
   }
 
-  if (!process.env.AZURE_SPEECH_KEY || !process.env.AZURE_SPEECH_REGION) {
+  if (
+    !process.env.AZURE_SPEECH_KEY ||
+    !process.env.AZURE_SPEECH_REGION
+  ) {
     return res.status(503).json({
       success: false,
       message: "Azure Speech is not configured on the backend.",
@@ -69,8 +74,10 @@ app.post("/api/tts", async (req, res) => {
   }
 
   const selectedGender = gender === "male" ? "male" : "female";
+
   const selectedVoice =
-    typeof voice === "string" && /^en-US-[A-Za-z]+Neural$/.test(voice)
+    typeof voice === "string" &&
+    /^en-US-[A-Za-z]+Neural$/.test(voice)
       ? voice
       : AZURE_TTS_VOICES[selectedGender];
 
@@ -98,7 +105,13 @@ app.post("/api/tts", async (req, res) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Azure TTS error:", response.status, errorText);
+
+      console.error(
+        "Azure TTS error:",
+        response.status,
+        errorText
+      );
+
       return res.status(502).json({
         success: false,
         message: "Azure Speech could not generate the voice audio.",
@@ -106,13 +119,16 @@ app.post("/api/tts", async (req, res) => {
     }
 
     const audioBuffer = await response.arrayBuffer();
+
     res.set({
       "Content-Type": "audio/mpeg",
       "Cache-Control": "no-store",
     });
+
     return res.send(Buffer.from(audioBuffer));
   } catch (error) {
     console.error("Azure TTS request failed:", error);
+
     return res.status(502).json({
       success: false,
       message: "Unable to reach Azure Speech.",
@@ -120,6 +136,7 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
+// ---- Escape XML ----
 function escapeXml(value) {
   return value
     .replace(/&/g, "&amp;")
@@ -131,18 +148,23 @@ function escapeXml(value) {
 
 // ---- 404 handler ----
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: "Route not found." });
+  res.status(404).json({
+    success: false,
+    message: "Route not found.",
+  });
 });
 
 // ---- Global error handler ----
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
+
   res.status(500).json({
     success: false,
     message: "Something went wrong on the server.",
   });
 });
 
+// ---- JWT warning ----
 if (!process.env.JWT_SECRET) {
   console.warn(
     "WARNING: JWT_SECRET is not set in .env — login/register will fail to sign tokens. " +
@@ -150,9 +172,16 @@ if (!process.env.JWT_SECRET) {
   );
 }
 
-app.listen(PORT, async () => {
-  console.log(`Verva backend running on http://localhost:${PORT}`);
+// ---- Start server ----
+// 0.0.0.0 allows other devices on the same network
+// to access the backend using the laptop's local IP.
+app.listen(PORT, "0.0.0.0", async () => {
+  console.log(
+    `Verva backend running on http://0.0.0.0:${PORT}`
+  );
+
   const dbOk = await testConnection();
+
   if (dbOk) {
     console.log("MySQL connection: OK");
   } else {
