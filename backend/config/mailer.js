@@ -1,35 +1,22 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 require("dotenv").config();
 
-let transporter = null;
+let resend = null;
 
-function getTransporter() {
-  if (transporter) return transporter;
+function getResend() {
+  if (resend) return resend;
 
-  if (!process.env.SMTP_HOST) {
+  if (!process.env.RESEND_API_KEY) {
     return null;
   }
 
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: Number(process.env.SMTP_PORT) === 465,
-    auth: process.env.SMTP_USER
-      ? {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        }
-      : undefined,
-  });
+  resend = new Resend(process.env.RESEND_API_KEY);
 
-  return transporter;
+  return resend;
 }
 
-/**
- * Sends a password reset code to the given email address.
- */
 async function sendPasswordResetEmail(toEmail, code) {
-  const appName = process.env.APP_NAME || "Verva";
+  const appName = process.env.APP_NAME || "SayVixa";
 
   const subject = `${appName} password reset code`;
 
@@ -45,7 +32,7 @@ If you didn't request this, you can safely ignore this email.`;
       margin: 0 auto;
       color: #1f1b3a;
     ">
-      <h2 style="margin-bottom: 4px;">${appName}</h2>
+      <h2>${appName}</h2>
 
       <p>Your password reset code is:</p>
 
@@ -68,49 +55,36 @@ If you didn't request this, you can safely ignore this email.`;
     </div>
   `;
 
-  const t = getTransporter();
+  const client = getResend();
 
-  // SMTP is not configured
-  if (!t) {
-    console.warn(
-      `[mailer] SMTP not configured — password reset code for ${toEmail}: ${code}`
-    );
-
-    return {
-      delivered: false,
-      message: "SMTP is not configured.",
-    };
+  if (!client) {
+    console.error("[mailer] RESEND_API_KEY is not configured.");
+    throw new Error("Email service is not configured.");
   }
 
   try {
-    // Verify SMTP connection before sending
-    await t.verify();
-
-    console.log("[mailer] SMTP connection verified.");
-
-    const info = await t.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: toEmail,
+    const { data, error } = await client.emails.send({
+      from: process.env.RESEND_FROM || "onboarding@resend.dev",
+      to: [toEmail],
       subject,
       text,
       html,
     });
 
+    if (error) {
+      console.error("[mailer] Resend ERROR:", error);
+      throw new Error(error.message || "Failed to send email.");
+    }
+
     console.log("[mailer] Password reset email sent successfully.");
-    console.log("[mailer] Message ID:", info.messageId);
+    console.log("[mailer] Message ID:", data?.id);
 
     return {
       delivered: true,
-      messageId: info.messageId,
+      messageId: data?.id,
     };
   } catch (error) {
-    console.error("[mailer] SMTP ERROR");
-    console.error("Code:", error.code);
-    console.error("Command:", error.command);
-    console.error("Response:", error.response);
-    console.error("Response Code:", error.responseCode);
-    console.error("Message:", error.message);
-
+    console.error("[mailer] Email sending failed:", error.message);
     throw error;
   }
 }
