@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
+import AdBanner from "../components/AdBanner";
+import NativeAd from "../components/NativeAd";
 
 const STEPS = [
   {
     number: "01",
     title: "Get Started",
     description:
-      "From the home page, press \"Get Started\". You'll land on the setup screen where every session begins.",
+      'From the home page, press "Get Started". You\'ll land on the setup screen where every session begins.',
   },
   {
     number: "02",
@@ -60,54 +62,195 @@ const STEPS = [
     number: "10",
     title: "Review Your Session",
     description:
-      "At the end, listen to your full recording, or press \"Play Full Conversation\" to hear the AI's lines and your responses together, turn by turn.",
+      'At the end, listen to your full recording, or press "Play Full Conversation" to hear the AI\'s lines and your responses together, turn by turn.',
   },
 ];
 
 export default function HowToUse() {
   return (
     <div className="page">
+
       <Header />
 
-      <section className="howto-hero">
-        <span className="hero-eyebrow">Guide</span>
-        <h1 className="howto-title">How to Use Verva</h1>
-        <p className="howto-subtitle">
-          A simple, guided way to practice spoken English — here's exactly how it works, start to
-          finish.
-        </p>
-      </section>
+      {/* ============================
+          AD STYLES
+          ============================ */}
 
-      <section className="howto-steps">
-        {STEPS.map((step) => (
-          <div className="howto-step card" key={step.number}>
-            <div className="howto-step-number">{step.number}</div>
-            <div className="howto-step-body">
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+      <style>{`
+        .howto-ad-layout {
+          position: relative;
+          width: 100%;
+        }
+
+        .howto-side-ad {
+          position: absolute;
+          top: 120px;
+          right: 20px;
+          width: 160px;
+          min-height: 300px;
+          z-index: 10;
+        }
+
+        .howto-native-ad {
+          width: 100%;
+          max-width: 900px;
+          margin: 30px auto;
+          padding: 10px 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        @media (max-width: 1100px) {
+          .howto-side-ad {
+            display: none;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .howto-native-ad {
+            margin: 22px auto;
+            padding: 8px;
+          }
+        }
+      `}</style>
+
+      <div className="howto-ad-layout">
+
+        {/* ============================
+            DESKTOP SIDE BANNER
+            ============================ */}
+
+        <aside
+          className="howto-side-ad"
+          aria-label="Advertisement"
+        >
+          <AdBanner />
+        </aside>
+
+        {/* ============================
+            HERO
+            ============================ */}
+
+        <section className="howto-hero">
+          <span className="hero-eyebrow">
+            Guide
+          </span>
+
+          <h1 className="howto-title">
+            How to Use Verva
+          </h1>
+
+          <p className="howto-subtitle">
+            A simple, guided way to practice
+            spoken English — here's exactly
+            how it works, start to finish.
+          </p>
+        </section>
+
+        {/* ============================
+            STEPS
+            ============================ */}
+
+        <section className="howto-steps">
+
+          {STEPS.map((step, index) => (
+            <div key={step.number}>
+
+              <div className="howto-step card">
+
+                <div className="howto-step-number">
+                  {step.number}
+                </div>
+
+                <div className="howto-step-body">
+
+                  <h3>
+                    {step.title}
+                  </h3>
+
+                  <p>
+                    {step.description}
+                  </p>
+
+                </div>
+
+              </div>
+
+              {/* Native ad after step 5 */}
+
+              {index === 4 && (
+                <section
+                  className="howto-native-ad"
+                  aria-label="Advertisement"
+                >
+                  <NativeAd />
+                </section>
+              )}
+
             </div>
+          ))}
+
+        </section>
+
+        {/* ============================
+            CTA
+            ============================ */}
+
+        <section className="cta">
+
+          <div className="cta-card card">
+
+            <h2>
+              Ready to try it yourself?
+            </h2>
+
+            <p>
+              It takes less than a minute
+              to set up your first session.
+            </p>
+
+            <Link
+              className="btn btn-primary btn-lg"
+              to="/setup"
+            >
+              Get Started
+            </Link>
+
           </div>
-        ))}
-      </section>
 
-      <section className="cta">
-        <div className="cta-card card">
-          <h2>Ready to try it yourself?</h2>
-          <p>It takes less than a minute to set up your first session.</p>
-          <Link className="btn btn-primary btn-lg" to="/setup">
-            Get Started
-          </Link>
-        </div>
-      </section>
+        </section>
 
-      <footer className="app-footer">
-        <div className="app-footer-links">
-          <Link to="/how-to-use">How to Use</Link>
-          <span className="app-footer-dot">•</span>
-          <Link to="/about">About</Link>
-        </div>
-        <p>Verva — a simple way to practice spoken English.</p>
-      </footer>
+        {/* ============================
+            FOOTER
+            ============================ */}
+
+        <footer className="app-footer">
+
+          <div className="app-footer-links">
+
+            <Link to="/how-to-use">
+              How to Use
+            </Link>
+
+            <span className="app-footer-dot">
+              •
+            </span>
+
+            <Link to="/about">
+              About
+            </Link>
+
+          </div>
+
+          <p>
+            Verva — a simple way to practice
+            spoken English.
+          </p>
+
+        </footer>
+
+      </div>
     </div>
   );
 }
