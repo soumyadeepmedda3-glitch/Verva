@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import CurtainTransition from "../components/CurtainTransition";
 import AdBanner from "../components/AdBanner";
+import NativeAd from "../components/NativeAd";
 
 const FEATURES = [
   {
@@ -36,7 +37,11 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["01", "Get Started", 'Press "Start Practicing" and open the setup screen.'],
+  [
+    "01",
+    "Get Started",
+    'Press "Start Practicing" and open the setup screen.',
+  ],
   [
     "02",
     "Choose a Topic",
@@ -115,124 +120,170 @@ export default function Home() {
         <CurtainTransition onFinish={() => navigate("/setup")} />
       )}
 
+      {/* =========================================================
+          AD LAYOUT STYLES
+          ========================================================= */}
+
+      <style>{`
+        .home-ad-layout {
+          position: relative;
+        }
+
+        .home-side-ad {
+          position: absolute;
+          top: 120px;
+          right: 20px;
+          width: 160px;
+          min-height: 300px;
+          z-index: 10;
+        }
+
+        .home-native-ad {
+          width: 100%;
+          max-width: 900px;
+          margin: 35px auto;
+          padding: 10px 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        @media (max-width: 1100px) {
+          .home-side-ad {
+            display: none;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .home-native-ad {
+            margin: 25px auto;
+            padding: 10px;
+          }
+        }
+      `}</style>
+
       <main>
-        {/* ================= HERO ================= */}
+        {/* =========================================================
+            HERO + SIDE AD
+            ========================================================= */}
 
-        <section className="landing-hero" id="top">
-          <div className="hero-glow hero-glow-one" />
-          <div className="hero-glow hero-glow-two" />
+        <div className="home-ad-layout">
+          {/* ================= HERO ================= */}
 
-          <div className="landing-hero-copy reveal">
-            <div className="hero-status">
-              <span />
-              Guided English speaking practice
+          <section className="landing-hero" id="top">
+            <div className="hero-glow hero-glow-one" />
+            <div className="hero-glow hero-glow-two" />
+
+            <div className="landing-hero-copy reveal">
+              <div className="hero-status">
+                <span />
+                Guided English speaking practice
+              </div>
+
+              <h1>
+                Speak English.
+                <br />
+                <span>Build confidence.</span>
+              </h1>
+
+              <p className="landing-lead">
+                Verva gives you a simple conversation to follow: listen to a
+                sentence, say the suggested response, and keep the conversation
+                moving.
+              </p>
+
+              <div className="hero-actions">
+                <button
+                  className="btn btn-primary btn-lg hero-main-btn"
+                  onClick={start}
+                >
+                  Start Practicing <span>→</span>
+                </button>
+
+                <a className="hero-text-link" href="#how-it-works">
+                  See how it works ↓
+                </a>
+              </div>
+
+              <div className="hero-trust-row">
+                <span>19+ everyday topics</span>
+                <i />
+                <span>3 levels</span>
+                <i />
+                <span>4 session lengths</span>
+              </div>
             </div>
 
-            <h1>
-              Speak English.
-              <br />
-              <span>Build confidence.</span>
-            </h1>
+            <div className="conversation-preview reveal reveal-delay-2">
+              <div className="preview-orbit orbit-a" />
+              <div className="preview-orbit orbit-b" />
 
-            <p className="landing-lead">
-              Verva gives you a simple conversation to follow: listen to a
-              sentence, say the suggested response, and keep the conversation
-              moving.
-            </p>
+              <div className="preview-card">
+                <div className="preview-top">
+                  <div className="preview-avatar">V</div>
 
-            <div className="hero-actions">
-              <button
-                className="btn btn-primary btn-lg hero-main-btn"
-                onClick={start}
-              >
-                Start Practicing <span>→</span>
-              </button>
+                  <div>
+                    <strong>Verva</strong>
+                    <small>Conversation partner</small>
+                  </div>
 
-              <a className="hero-text-link" href="#how-it-works">
-                See how it works ↓
-              </a>
-            </div>
-
-            <div className="hero-trust-row">
-              <span>19+ everyday topics</span>
-              <i />
-              <span>3 levels</span>
-              <i />
-              <span>4 session lengths</span>
-            </div>
-          </div>
-
-          <div className="conversation-preview reveal reveal-delay-2">
-            <div className="preview-orbit orbit-a" />
-            <div className="preview-orbit orbit-b" />
-
-            <div className="preview-card">
-              <div className="preview-top">
-                <div className="preview-avatar">V</div>
-
-                <div>
-                  <strong>Verva</strong>
-                  <small>Conversation partner</small>
+                  <span className="live-dot">●</span>
                 </div>
 
-                <span className="live-dot">●</span>
+                <div className="preview-bubble ai-bubble">
+                  Good morning! How are you today?
+                </div>
+
+                <div className="preview-wave">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+
+                <div className="preview-answer">
+                  <small>Your turn</small>
+                  <p>“I'm good, thank you. How are you?”</p>
+                </div>
+
+                <div className="preview-next">
+                  NEXT <span>→</span>
+                </div>
               </div>
 
-              <div className="preview-bubble ai-bubble">
-                Good morning! How are you today?
+              <div className="floating-chip chip-record">
+                ● Recording ready
               </div>
 
-              <div className="preview-wave">
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-              </div>
-
-              <div className="preview-answer">
-                <small>Your turn</small>
-                <p>“I'm good, thank you. How are you?”</p>
-              </div>
-
-              <div className="preview-next">
-                NEXT <span>→</span>
+              <div className="floating-chip chip-topic">
+                Travel conversation
               </div>
             </div>
+          </section>
 
-            <div className="floating-chip chip-record">
-              ● Recording ready
-            </div>
+          {/* ================= AD #1 — 160x300 BANNER ================= */}
 
-            <div className="floating-chip chip-topic">
-              Travel conversation
-            </div>
-          </div>
-        </section>
+          <aside
+            className="home-side-ad"
+            aria-label="Advertisement"
+          >
+            <AdBanner />
+          </aside>
+        </div>
 
-        {/* ================= HOME BANNER AD ================= */}
+        {/* =========================================================
+            MARQUEE
+            ========================================================= */}
 
         <section
-          className="home-ad-section"
-          aria-label="Advertisement"
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "320px",
-            padding: "20px 0",
-          }}
+          className="marquee-strip"
+          aria-label="Verva features"
         >
-          <AdBanner />
-        </section>
-
-        {/* ================= MARQUEE ================= */}
-
-        <section className="marquee-strip" aria-label="Verva features">
           <div>
             <span>LISTEN</span>
             <b>•</b>
@@ -250,7 +301,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= FEATURES ================= */}
+        {/* =========================================================
+            AD #2 — NATIVE BANNER
+            ========================================================= */}
+
+        <section
+          className="home-native-ad"
+          aria-label="Advertisement"
+        >
+          <NativeAd />
+        </section>
+
+        {/* =========================================================
+            FEATURES
+            ========================================================= */}
 
         <section
           className="landing-section intro-section"
@@ -292,7 +356,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= HOW IT WORKS ================= */}
+        {/* =========================================================
+            HOW IT WORKS
+            ========================================================= */}
 
         <section
           className="landing-section how-section"
@@ -334,7 +400,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= SETUP ================= */}
+        {/* =========================================================
+            SETUP PREVIEW
+            ========================================================= */}
 
         <section
           className="landing-section setup-preview-section"
@@ -389,7 +457,10 @@ export default function Home() {
                 <div className="mock-label">LEVEL</div>
 
                 <div className="mock-options">
-                  <span className="selected">Beginner</span>
+                  <span className="selected">
+                    Beginner
+                  </span>
+
                   <span>Intermediate</span>
                   <span>Advanced</span>
                 </div>
@@ -400,7 +471,9 @@ export default function Home() {
 
                 <div className="mock-options">
                   <span>5 min</span>
-                  <span className="selected">10 min</span>
+                  <span className="selected">
+                    10 min
+                  </span>
                   <span>15 min</span>
                   <span>25 min</span>
                 </div>
@@ -412,16 +485,24 @@ export default function Home() {
                 <div className="mock-label">AI VOICE</div>
 
                 <div className="mock-options">
-                  <span className="selected">♀ Female</span>
+                  <span className="selected">
+                    ♀ Female
+                  </span>
+
                   <span>♂ Male</span>
                 </div>
               </div>
 
               <div>
-                <div className="mock-label">RECORDING</div>
+                <div className="mock-label">
+                  RECORDING
+                </div>
 
                 <div className="mock-options">
-                  <span className="selected">🎙 On</span>
+                  <span className="selected">
+                    🎙 On
+                  </span>
+
                   <span>Off</span>
                 </div>
               </div>
@@ -436,7 +517,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= ABOUT ================= */}
+        {/* =========================================================
+            ABOUT
+            ========================================================= */}
 
         <section
           className="landing-section about-section"
@@ -481,13 +564,17 @@ export default function Home() {
               <div>
                 <strong>02</strong>
                 <span>Focused</span>
-                <small>One conversation turn at a time.</small>
+                <small>
+                  One conversation turn at a time.
+                </small>
               </div>
 
               <div>
                 <strong>03</strong>
                 <span>Flexible</span>
-                <small>Choose your topic and session length.</small>
+                <small>
+                  Choose your topic and session length.
+                </small>
               </div>
 
               <div>
@@ -501,7 +588,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= CTA ================= */}
+        {/* =========================================================
+            FINAL CTA
+            ========================================================= */}
 
         <section className="final-cta">
           <div className="final-cta-glow" />
@@ -529,7 +618,9 @@ export default function Home() {
         </section>
       </main>
 
-      {/* ================= FOOTER ================= */}
+      {/* =========================================================
+          FOOTER
+          ========================================================= */}
 
       <footer className="app-footer landing-footer">
         <div className="footer-contact-box">
@@ -548,7 +639,9 @@ export default function Home() {
                 YouTube Channel-
               </span>
 
-              <strong>Digital Defence 365</strong>
+              <strong>
+                Digital Defence 365
+              </strong>
 
               <small>
                 || Tutorials, updates & more
@@ -573,7 +666,9 @@ export default function Home() {
                 Contact-
               </span>
 
-              <strong>sayvixaofficial@gmail.com</strong>
+              <strong>
+                sayvixaofficial@gmail.com
+              </strong>
 
               <small>
                 || Questions, feedback & ideas
