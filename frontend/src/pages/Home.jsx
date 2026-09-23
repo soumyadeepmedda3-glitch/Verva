@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import CurtainTransition from "../components/CurtainTransition";
+import AdBanner from "../components/AdBanner";
 
 const FEATURES = [
   {
@@ -211,6 +212,22 @@ export default function Home() {
               Travel conversation
             </div>
           </div>
+        </section>
+
+        {/* ================= HOME BANNER AD ================= */}
+
+        <section
+          className="home-ad-section"
+          aria-label="Advertisement"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "320px",
+            padding: "20px 0",
+          }}
+        >
+          <AdBanner />
         </section>
 
         {/* ================= MARQUEE ================= */}
@@ -516,7 +533,6 @@ export default function Home() {
 
       <footer className="app-footer landing-footer">
         <div className="footer-contact-box">
-
           <a
             className="footer-contact-card"
             href="https://www.youtube.com/@Digitaldefence365"
@@ -532,12 +548,10 @@ export default function Home() {
                 YouTube Channel-
               </span>
 
-              <strong>
-                 Digital Defence 365 
-              </strong>
+              <strong>Digital Defence 365</strong>
 
               <small>
-               || Tutorials, updates & more
+                || Tutorials, updates & more
               </small>
             </div>
 
@@ -559,9 +573,7 @@ export default function Home() {
                 Contact-
               </span>
 
-              <strong>
-                 sayvixaofficial@gmail.com 
-              </strong>
+              <strong>sayvixaofficial@gmail.com</strong>
 
               <small>
                 || Questions, feedback & ideas
@@ -572,7 +584,6 @@ export default function Home() {
               →
             </span>
           </a>
-
         </div>
 
         <div className="app-footer-links">
